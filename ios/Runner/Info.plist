@@ -2,6 +2,13 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
+	<key>UIUserInterfaceStyle</key>
+	<string>Light</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
@@ -27,9 +34,15 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>We need access to your photo library to save an avatar</string>
+	<string>We need access to your photo library to save an avatar.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>We need access to your photo library to select an avatar</string>
+	<string>We need access to your photo library to select an avatar.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>We need access to camera to take a photo for your profile avatar.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>We need access to microphone for video calls and recording voice messages in chat.</string>
+	<key>NSContactsUsageDescription</key>
+	<string>We need to use your address book permissions to recommend friends to you.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
