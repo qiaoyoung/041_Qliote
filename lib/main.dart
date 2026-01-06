@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'home_page.dart';
-import 'qliote_speech_page.dart';
-import 'qliote_Inspiration_page.dart';
-import 'qliote_profile_page.dart';
+import 'qyiaar_speech_page.dart';
+import 'qyiaar_Inspiration_page.dart';
+import 'qyiaar_profile_page.dart';
 import 'welcome_page.dart';
 
 const Color _primaryColor = Color(0xFFFE69A8);
@@ -69,7 +69,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Qliote',
+      title: 'Qyiaar',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: _primaryColor),
@@ -101,13 +101,13 @@ class _MainTabBarPageState extends State<MainTabBarPage> {
             index: _currentIndex,
             children: [
               const HomePage(),
-              QlioteInspirationPage(
+              QyiaarInspirationPage(
                 onDataChanged: () {
                   // 数据更改时刷新页面
                   setState(() {});
                 },
               ),
-              const QlioteProfilePage(),
+              const QyiaarProfilePage(),
             ],
           ),
           Positioned(
@@ -120,15 +120,15 @@ class _MainTabBarPageState extends State<MainTabBarPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   _buildNavButton(
-                    'assets/qliote_home.png',
+                    'assets/qyiaar_home.png',
                     0,
                   ),
                   _buildNavButton(
-                    'assets/qliote_circle.png',
+                    'assets/qyiaar_circle.png',
                     1,
                   ),
                   _buildNavButton(
-                    'assets/qliote_profile.png',
+                    'assets/qyiaar_profile.png',
                     2,
                   ),
                 ],

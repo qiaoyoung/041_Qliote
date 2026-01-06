@@ -58,7 +58,7 @@ class _ReportPageState extends State<ReportPage> {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
     final statusBarHeight = MediaQuery.of(context).padding.top;
-    final nickname = widget.character['QlioteNickName'] ?? 'Unknown';
+    final nickname = widget.character['QyiaarNickName'] ?? 'Unknown';
 
     return Scaffold(
       body: Stack(

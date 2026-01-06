@@ -1,4 +1,4 @@
-name: qliote
+name: qyiaar
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -70,18 +70,18 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/
-    - assets/qliotefigure/
-    - assets/qliotefigure/1/
-    - assets/qliotefigure/2/
-    - assets/qliotefigure/3/
-    - assets/qliotefigure/4/
-    - assets/qliotefigure/5/
-    - assets/qliotefigure/6/
-    - assets/qliotefigure/7/
-    - assets/qliotefigure/8/
-    - assets/qliotefigure/9/
-    - assets/qliotefigure/10/
-    - assets/qliotefigure/11/
+    - assets/qyiaarfigure/
+    - assets/qyiaarfigure/1/
+    - assets/qyiaarfigure/2/
+    - assets/qyiaarfigure/3/
+    - assets/qyiaarfigure/4/
+    - assets/qyiaarfigure/5/
+    - assets/qyiaarfigure/6/
+    - assets/qyiaarfigure/7/
+    - assets/qyiaarfigure/8/
+    - assets/qyiaarfigure/9/
+    - assets/qyiaarfigure/10/
+    - assets/qyiaarfigure/11/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

@@ -227,7 +227,7 @@ class _QyiaarEditorPageState extends State<QyiaarEditorPage> {
                                   );
                                 } else {
                                   return Image.asset(
-                                    'assets/user_qliote_icon.png',
+                                    'assets/user_qyiaar_icon.png',
                                     width: 100,
                                     height: 100,
                                     fit: BoxFit.cover,

@@ -197,7 +197,7 @@ class _QyiaarProfilePageState extends State<QyiaarProfilePage> with WidgetsBindi
                                       );
                                     } else {
                                       return Image.asset(
-                                        'assets/user_qliote_icon.png',
+                                        'assets/user_qyiaar_icon.png',
                                         width: 60,
                                         height: 60,
                                         fit: BoxFit.cover,

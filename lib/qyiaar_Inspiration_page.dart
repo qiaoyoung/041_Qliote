@@ -116,7 +116,7 @@ class _QyiaarInspirationPageState extends State<QyiaarInspirationPage> with Widg
   }
 
   void _showActionSheet(BuildContext context, Map<String, dynamic> character) {
-    final nickname = character['QlioteNickName'] ?? 'Unknown';
+    final nickname = character['QyiaarNickName'] ?? 'Unknown';
     
     showCupertinoModalPopup(
       context: context,
@@ -253,18 +253,18 @@ class _QyiaarInspirationPageState extends State<QyiaarInspirationPage> with Widg
         runSpacing: runSpacing,
         children: List.generate(_filteredCharacters.length, (index) {
           final character = _filteredCharacters[index];
-          final thumbnailArray = character['QlioteShowThumbnailArray'] as List<dynamic>?;
+          final thumbnailArray = character['QyiaarShowThumbnailArray'] as List<dynamic>?;
           final thumbnailPath = thumbnailArray != null && thumbnailArray.isNotEmpty
               ? thumbnailArray[0] as String
               : null;
 
-          final videoArray = character['QlioteShowVideoArray'] as List<dynamic>?;
+          final videoArray = character['QyiaarShowVideoArray'] as List<dynamic>?;
           final videoPath = videoArray != null && videoArray.isNotEmpty
               ? videoArray[0] as String
               : null;
 
           final nickname = character['QyiaarNickName'] as String? ?? '';
-          final avatarPath = character['QlioteUserIcon'] as String? ?? '';
+          final avatarPath = character['QyiaarUserIcon'] as String? ?? '';
 
           return GestureDetector(
             onTap: () {
@@ -418,7 +418,7 @@ class _QyiaarInspirationPageState extends State<QyiaarInspirationPage> with Widg
                                             },
                                           )
                                         : Image.asset(
-                                            'assets/user_qliote_icon.png',
+                                            'assets/user_qyiaar_icon.png',
                                             width: 24,
                                             height: 24,
                                             fit: BoxFit.cover,

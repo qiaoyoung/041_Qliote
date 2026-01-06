@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'qliote_speech_page.dart';
-import 'qliote_Inspiration_page.dart';
-import 'qliote_profile_page.dart';
+import 'qyiaar_speech_page.dart';
+import 'qyiaar_Inspiration_page.dart';
+import 'qyiaar_profile_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -85,7 +85,7 @@ class HomePage extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => const QlioteSpeechPage(),
+                builder: (context) => const QyiaarSpeechPage(),
               ),
             );
           },

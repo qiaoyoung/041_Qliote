@@ -391,7 +391,7 @@ class _TextToVideoPageState extends State<TextToVideoPage> {
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) {
                           return Image.asset(
-                            'assets/user_qliote_icon.png',
+                            'assets/user_qyiaar_icon.png',
                             width: 32,
                             height: 32,
                             fit: BoxFit.cover,
@@ -400,7 +400,7 @@ class _TextToVideoPageState extends State<TextToVideoPage> {
                       );
                     } else {
                       return Image.asset(
-                        'assets/user_qliote_icon.png',
+                        'assets/user_qyiaar_icon.png',
                         width: 32,
                         height: 32,
                         fit: BoxFit.cover,
