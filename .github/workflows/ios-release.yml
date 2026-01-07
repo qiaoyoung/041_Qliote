@@ -82,7 +82,7 @@ jobs:
 
       - name: Upload to App Store using altool
         env:
-          IPA_PATH: "build/ios/ipa/qliote.ipa"
+          IPA_PATH: "build/ios/ipa/qyiaar.ipa"
           APPLE_ID: "Mikaelaescultero11@outlook.com"
           APP_SPECIFIC_PASSWORD: "wguv-pvbg-ydkb-jnfi"
         run: |
