@@ -16,7 +16,7 @@ class _UserAgreementPageState extends State<UserAgreementPage> {
     super.initState();
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..loadRequest(Uri.parse('https://www.privacypolicies.com/live/74492480-1b09-4774-a695-fe5cb598d2c0'));
+      ..loadRequest(Uri.parse('https://www.privacypolicies.com/live/d60b88aa-9236-4e8e-845d-1b159fd973cd'));
   }
 
   @override

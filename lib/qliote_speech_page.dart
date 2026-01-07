@@ -623,7 +623,7 @@ class _QyiaarSpeechPageState extends State<QyiaarSpeechPage> {
                       );
                     } else {
                       return Image.asset(
-                        'assets/user_qliote_icon.png',
+                        'assets/user_qyiaar_icon.png',
                         width: 32,
                         height: 32,
                         fit: BoxFit.cover,
