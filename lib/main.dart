@@ -3,6 +3,7 @@ import 'home_page.dart';
 import 'qyiaar_speech_page.dart';
 import 'qyiaar_Inspiration_page.dart';
 import 'qyiaar_profile_page.dart';
+import 'qyiaar_post_page.dart';
 import 'welcome_page.dart';
 
 const Color _primaryColor = Color(0xFFFE69A8);
@@ -107,6 +108,7 @@ class _MainTabBarPageState extends State<MainTabBarPage> {
                   setState(() {});
                 },
               ),
+              const QyiaarPostPage(),
               const QyiaarProfilePage(),
             ],
           ),
@@ -128,8 +130,12 @@ class _MainTabBarPageState extends State<MainTabBarPage> {
                     1,
                   ),
                   _buildNavButton(
-                    'assets/qyiaar_profile.png',
+                    'assets/qliote_post.png',
                     2,
+                  ),
+                  _buildNavButton(
+                    'assets/qyiaar_profile.png',
+                    3,
                   ),
                 ],
               ),
@@ -156,8 +162,8 @@ class _MainTabBarPageState extends State<MainTabBarPage> {
         curve: Curves.easeInOut,
         child: Image.asset(
           imagePath,
-          width: 73,
-          height: 74,
+          width: 55,
+          height: 55,
           fit: BoxFit.contain,
         ),
       ),

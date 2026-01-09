@@ -7,6 +7,9 @@ import 'text_to_video_page.dart';
 import 'Video_qyiaar_page.dart';
 import 'report_page.dart';
 import 'qyiaar_figure_detail_page.dart';
+import 'qyiaar_Inspiration_list_page.dart';
+import 'qyiaar_Inspiration_list_full_page.dart';
+import 'qyiaar_voice_course_list_page.dart';
 
 class QyiaarInspirationPage extends StatefulWidget {
   final VoidCallback? onDataChanged;
@@ -201,6 +204,47 @@ class _QyiaarInspirationPageState extends State<QyiaarInspirationPage> with Widg
                 Navigator.push(
                   context,
                   MaterialPageRoute(
+                    builder: (context) => const QyiaarInspirationListFullPage(),
+                  ),
+                );
+              },
+              child: Container(
+                width: screenWidth - 40,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border.all(color: Colors.black, width: 1),
+                  borderRadius: BorderRadius.circular(28),
+                  boxShadow: const [
+                    BoxShadow(
+                      offset: Offset(4, 4),
+                      blurRadius: 0,
+                      color: Color(0xFF000000),
+                    ),
+                  ],
+                ),
+                child: const Center(
+                  child: Text(
+                    'Appreciate Voice Acting',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            top: 115 + 56 + 20,
+            left: 20,
+            right: 20,
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
                     builder: (context) => const TextToVideoPage(),
                   ),
                 );
@@ -226,254 +270,19 @@ class _QyiaarInspirationPageState extends State<QyiaarInspirationPage> with Widg
             ),
           ),
           Positioned(
-            top: 115 + _imageHeight + 20,
+            top: 115 + 56 + 20 + _imageHeight + 20,
             left: 0,
             right: 0,
             bottom: 120,
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : SingleChildScrollView(
-                    child: _buildCharacterList(screenWidth),
-                  ),
+            child: SingleChildScrollView(
+              child: const QyiaarVoiceCourseListPage(),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildCharacterList(double screenWidth) {
-    final itemWidth = (screenWidth - 60) / 2.0;
-    final spacing = 20.0;
-    final runSpacing = 20.0;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Wrap(
-        spacing: spacing,
-        runSpacing: runSpacing,
-        children: List.generate(_filteredCharacters.length, (index) {
-          final character = _filteredCharacters[index];
-          final thumbnailArray = character['QyiaarShowThumbnailArray'] as List<dynamic>?;
-          final thumbnailPath = thumbnailArray != null && thumbnailArray.isNotEmpty
-              ? thumbnailArray[0] as String
-              : null;
-
-          final videoArray = character['QyiaarShowVideoArray'] as List<dynamic>?;
-          final videoPath = videoArray != null && videoArray.isNotEmpty
-              ? videoArray[0] as String
-              : null;
-
-          final nickname = character['QyiaarNickName'] as String? ?? '';
-          final avatarPath = character['QyiaarUserIcon'] as String? ?? '';
-
-          return GestureDetector(
-            onTap: () {
-              if (videoPath != null) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => VideoQyiaarPage(
-                      videoPath: videoPath,
-                      character: character,
-                    ),
-                  ),
-                );
-              }
-            },
-            child: SizedBox(
-              width: itemWidth,
-              height: 200,
-              child: Container(
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage('assets/inspiration_video_cell_bg.png'),
-                    fit: BoxFit.fill,
-                  ),
-                  borderRadius: BorderRadius.circular(18),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(10),
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      // 缩略图 - 带圆角
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(18),
-                        child: thumbnailPath != null
-                            ? Image.asset(
-                                thumbnailPath,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return const Center(
-                                    child: Icon(Icons.error, color: Colors.grey),
-                                  );
-                                },
-                              )
-                            : const Center(
-                                child: Icon(Icons.image, color: Colors.grey),
-                              ),
-                      ),
-                      // 黑色半透明蒙版 - 只覆盖缩略图部分，带圆角
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(18),
-                        child: Container(
-                          color: Colors.black.withOpacity(0.5),
-                          child: const Center(
-                            child: Icon(
-                              Icons.play_circle_filled,
-                              color: Colors.white,
-                              size: 50,
-                            ),
-                          ),
-                        ),
-                      ),
-                      // 举报按钮 - 右上角
-                      Positioned(
-                        top: 0,
-                        right: 0,
-                        child: GestureDetector(
-                          onTap: () {
-                            _showActionSheet(context, character);
-                          },
-                          behavior: HitTestBehavior.opaque,
-                          child: Container(
-                            width: 28,
-                            height: 28,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.white,
-                              boxShadow: const [
-                                BoxShadow(
-                                  color: Colors.black,
-                                  offset: Offset(2, 2),
-                                  blurRadius: 0,
-                                ),
-                              ],
-                            ),
-                            child: const Icon(
-                              Icons.report,
-                              color: Colors.black,
-                              size: 16,
-                            ),
-                          ),
-                        ),
-                      ),
-                      // 角色信息 - 底部（头像和昵称）
-                      Positioned(
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.6),
-                            borderRadius: const BorderRadius.only(
-                              bottomLeft: Radius.circular(18),
-                              bottomRight: Radius.circular(18),
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              // 头像 - 可点击跳转到详情页
-                              GestureDetector(
-                                onTap: () async {
-                                  final result = await Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => QyiaarFigureDetailPage(
-                                        character: character,
-                                        onDataChanged: () {
-                                          // Refresh data when returning from detail page
-                                          _refreshData();
-                                        },
-                                      ),
-                                    ),
-                                  );
-                                  // Refresh data if needed
-                                  if (result == true) {
-                                    _refreshData();
-                                  }
-                                },
-                                child: Container(
-                                  width: 24,
-                                  height: 24,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    border: Border.all(color: Colors.white, width: 1),
-                                  ),
-                                  child: ClipOval(
-                                    child: avatarPath.isNotEmpty
-                                        ? Image.asset(
-                                            avatarPath,
-                                            width: 24,
-                                            height: 24,
-                                            fit: BoxFit.cover,
-                                            errorBuilder: (context, error, stackTrace) {
-                                              return Image.asset(
-                                                'assets/user_qyiaar_icon.png',
-                                                width: 24,
-                                                height: 24,
-                                                fit: BoxFit.cover,
-                                              );
-                                            },
-                                          )
-                                        : Image.asset(
-                                            'assets/user_qyiaar_icon.png',
-                                            width: 24,
-                                            height: 24,
-                                            fit: BoxFit.cover,
-                                          ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 6),
-                              // 昵称 - 可点击跳转到详情页
-                              Expanded(
-                                child: GestureDetector(
-                                  onTap: () async {
-                                    final result = await Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => QyiaarFigureDetailPage(
-                                          character: character,
-                                          onDataChanged: () {
-                                            // Refresh data when returning from detail page
-                                            _refreshData();
-                                          },
-                                        ),
-                                      ),
-                                    );
-                                    // Refresh data if needed
-                                    if (result == true) {
-                                      _refreshData();
-                                    }
-                                  },
-                                  child: Text(
-                                    nickname,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          );
-        }),
-      ),
-    );
-  }
 }
 
 
