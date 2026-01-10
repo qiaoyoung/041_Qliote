@@ -1,11 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_player/video_player.dart';
-import 'profile_post_sumbit_page.dart';
 import 'post_history_page.dart';
+import 'qyiaar_add_post_page.dart';
 
 class QyiaarPostPage extends StatefulWidget {
   const QyiaarPostPage({super.key});
@@ -15,185 +14,78 @@ class QyiaarPostPage extends StatefulWidget {
 }
 
 class _QyiaarPostPageState extends State<QyiaarPostPage> {
-  final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _contentController = TextEditingController();
-  final ImagePicker _picker = ImagePicker();
-  File? _selectedVideo;
-  String? _selectedVoiceTone;
-  VideoPlayerController? _videoController;
+  double _addButtonHeight = 0;
+  List<Map<String, dynamic>> _posts = [];
 
-  final List<String> _voiceTones = [
-    'Bubble Voice',
-    'Mature Female Voice',
-    'Little Boy Voice',
-    'Little Girl Voice',
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _loadPosts();
+  }
 
-  Future<void> _pickVideo() async {
+  Future<void> _loadPosts() async {
     try {
-      final XFile? video = await _picker.pickVideo(
-        source: ImageSource.gallery,
-      );
+      final prefs = await SharedPreferences.getInstance();
+      final postsJson = prefs.getStringList('post_history') ?? [];
+      
+      final posts = postsJson.map((json) {
+        return jsonDecode(json) as Map<String, dynamic>;
+      }).toList();
+      
+      posts.sort((a, b) {
+        final createdAtA = a['createdAt'] as String? ?? '';
+        final createdAtB = b['createdAt'] as String? ?? '';
+        return createdAtB.compareTo(createdAtA);
+      });
+      
+      setState(() {
+        _posts = posts;
+      });
+    } catch (e) {
+      print('Error loading posts: $e');
+    }
+  }
 
-      if (video != null) {
-        final videoFile = File(video.path);
-        // Verify it's actually a video file by checking extension
-        final extension = video.path.toLowerCase();
-        if (extension.endsWith('.mp4') || 
-            extension.endsWith('.mov') || 
-            extension.endsWith('.avi') ||
-            extension.endsWith('.mkv')) {
-          // Dispose previous controller
-          await _videoController?.dispose();
-          
-          // Create new video controller for thumbnail
-          final controller = VideoPlayerController.file(videoFile);
-          await controller.initialize();
-          
-          setState(() {
-            _selectedVideo = videoFile;
-            _videoController = controller;
-          });
-        } else {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Please select a valid video file')),
-            );
-          }
+  Future<void> _deletePost(int index) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final postsJson = prefs.getStringList('post_history') ?? [];
+      
+      if (index >= 0 && index < postsJson.length) {
+        postsJson.removeAt(index);
+        await prefs.setStringList('post_history', postsJson);
+        
+        await _loadPosts();
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Post deleted')),
+          );
         }
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to pick video: $e')),
+          SnackBar(content: Text('Failed to delete post: $e')),
         );
       }
     }
   }
 
-  void _showVoiceTonePicker() {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return Container(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                'Select Voice Tone',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 16),
-              ListView.builder(
-                shrinkWrap: true,
-                itemCount: _voiceTones.length,
-                itemBuilder: (context, index) {
-                  final tone = _voiceTones[index];
-                  final isSelected = _selectedVoiceTone == tone;
-
-                  return ListTile(
-                    title: Text(tone),
-                    trailing: isSelected
-                        ? const Icon(Icons.check, color: Colors.blue)
-                        : null,
-                    onTap: () {
-                      setState(() {
-                        _selectedVoiceTone = tone;
-                      });
-                      Navigator.pop(context);
-                    },
-                  );
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Future<void> _savePostHistory(String title, String content, String? videoPath, String? voiceTone) async {
+  String _formatDateTime(String? dateTimeString) {
+    if (dateTimeString == null) return '';
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final postsJson = prefs.getStringList('post_history') ?? [];
-      
-      final postInfo = {
-        'title': title,
-        'content': content,
-        'videoPath': videoPath ?? '',
-        'voiceTone': voiceTone ?? '',
-        'createdAt': DateTime.now().toIso8601String(),
-      };
-      
-      postsJson.add(jsonEncode(postInfo));
-      await prefs.setStringList('post_history', postsJson);
+      final dateTime = DateTime.parse(dateTimeString);
+      return '${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')} ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
     } catch (e) {
-      print('Error saving post history: $e');
+      return '';
     }
   }
 
-  void _handlePost() async {
-    if (_titleController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a title')),
-      );
-      return;
-    }
-
-    if (_contentController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter content')),
-      );
-      return;
-    }
-
-    if (_selectedVideo == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a video')),
-      );
-      return;
-    }
-
-    if (_selectedVoiceTone == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a voice tone')),
-      );
-      return;
-    }
-
-    final title = _titleController.text.trim();
-    final content = _contentController.text.trim();
-    final videoPath = _selectedVideo!.path;
-    final voiceTone = _selectedVoiceTone!;
-
-    await _savePostHistory(title, content, videoPath, voiceTone);
-
-    _titleController.clear();
-    _contentController.clear();
-    await _videoController?.dispose();
-    setState(() {
-      _selectedVideo = null;
-      _selectedVoiceTone = null;
-      _videoController = null;
-    });
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const ProfilePostSubmitPage(),
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-
     final statusBarHeight = MediaQuery.of(context).padding.top;
 
     return Scaffold(
@@ -244,236 +136,387 @@ class _QyiaarPostPageState extends State<QyiaarPostPage> {
             ),
           ),
           Positioned(
-            top: MediaQuery.of(context).padding.top + 80,
+            top: statusBarHeight + 60,
+            left: 20,
+            right: 20,
+            child: GestureDetector(
+              onTap: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const QyiaarAddPostPage(),
+                  ),
+                );
+                _loadPosts();
+              },
+              child: Image.asset(
+                'assets/voice_add.png',
+                width: screenWidth - 40,
+                fit: BoxFit.fitWidth,
+                frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+                  if (frame != null && _addButtonHeight == 0) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      final RenderBox? renderBox = context.findRenderObject() as RenderBox?;
+                      if (renderBox != null && mounted) {
+                        setState(() {
+                          _addButtonHeight = renderBox.size.height;
+                        });
+                      }
+                    });
+                  }
+                  return child;
+                },
+              ),
+            ),
+          ),
+          Positioned(
+            top: statusBarHeight + 60 + (_addButtonHeight > 0 ? _addButtonHeight + 20 : 100),
             left: 0,
             right: 0,
             bottom: 0,
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 20),
-                  _buildSection(
-                    'Title',
-                    TextField(
-                      controller: _titleController,
-                      decoration: InputDecoration(
-                        hintText: 'Enter title',
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Colors.black, width: 1),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Colors.black, width: 1),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Colors.black, width: 2),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: _posts.isEmpty
+                ? Center(
+                    child: Text(
+                      'No posts yet',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey[600],
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 20),
-                  _buildSection(
-                    'Content',
-                    TextField(
-                      controller: _contentController,
-                      maxLines: 5,
-                      decoration: InputDecoration(
-                        hintText: 'Enter content',
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Colors.black, width: 1),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Colors.black, width: 1),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Colors.black, width: 2),
-                        ),
-                        contentPadding: const EdgeInsets.all(16),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  _buildSection(
-                    'Video',
-                    GestureDetector(
-                      onTap: _pickVideo,
-                      child: Container(
-                        height: 150,
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    itemCount: _posts.length,
+                    itemBuilder: (context, index) {
+                      final post = _posts[index];
+                      final title = post['title'] as String? ?? 'No Title';
+                      final content = post['content'] as String? ?? 'No Content';
+                      final videoPath = post['videoPath'] as String? ?? '';
+                      final voiceTone = post['voiceTone'] as String? ?? 'Unknown Tone';
+                      final thumbnailPath = post['thumbnailPath'] as String? ?? '';
+                      final createdAt = post['createdAt'] as String?;
+
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.grey[200],
-                          borderRadius: BorderRadius.circular(12),
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
                           border: Border.all(color: Colors.black, width: 1),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Colors.black,
+                              offset: Offset(2, 2),
+                              blurRadius: 0,
+                            ),
+                          ],
                         ),
-                        child: _selectedVideo != null && _videoController != null
-                            ? Stack(
-                                children: [
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(12),
-                                    child: _videoController!.value.isInitialized
-                                        ? SizedBox(
-                                            width: double.infinity,
-                                            height: double.infinity,
-                                            child: VideoPlayer(_videoController!),
-                                          )
-                                        : Container(
-                                            width: double.infinity,
-                                            height: double.infinity,
-                                            decoration: BoxDecoration(
-                                              color: Colors.grey[300],
-                                              borderRadius: BorderRadius.circular(12),
-                                            ),
-                                            child: const Center(
-                                              child: CircularProgressIndicator(),
-                                            ),
-                                          ),
-                                  ),
-                                  Positioned.fill(
-                                    child: Container(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // 左侧视频封面图
+                            if (thumbnailPath.isNotEmpty)
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.file(
+                                  File(thumbnailPath),
+                                  width: 100,
+                                  height: 100,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Container(
+                                      width: 100,
+                                      height: 100,
                                       decoration: BoxDecoration(
+                                        color: Colors.grey[300],
                                         borderRadius: BorderRadius.circular(12),
-                                        color: Colors.black.withOpacity(0.3),
+                                        border: Border.all(color: Colors.black, width: 1),
                                       ),
                                       child: const Center(
                                         child: Icon(
-                                          Icons.play_circle_filled,
-                                          color: Colors.white,
-                                          size: 50,
+                                          Icons.video_library,
+                                          color: Colors.grey,
+                                          size: 32,
                                         ),
                                       ),
-                                    ),
-                                  ),
-                                  Positioned(
-                                    top: 8,
-                                    right: 8,
-                                    child: GestureDetector(
-                                      onTap: () async {
-                                        await _videoController?.dispose();
-                                        setState(() {
-                                          _selectedVideo = null;
-                                          _videoController = null;
-                                        });
-                                      },
-                                      child: Container(
-                                        padding: const EdgeInsets.all(4),
-                                        decoration: const BoxDecoration(
-                                          color: Colors.red,
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: const Icon(
-                                          Icons.close,
-                                          color: Colors.white,
-                                          size: 16,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                                    );
+                                  },
+                                ),
                               )
-                            : const Center(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(Icons.video_library, size: 48, color: Colors.grey),
-                                    SizedBox(height: 8),
-                                    Text(
-                                      'Tap to select video',
-                                      style: TextStyle(color: Colors.grey),
-                                    ),
-                                  ],
+                            else if (videoPath.isNotEmpty)
+                              _VideoThumbnail(
+                                videoPath: videoPath,
+                              )
+                            else
+                              Container(
+                                width: 100,
+                                height: 100,
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[300],
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: Colors.black, width: 1),
+                                ),
+                                child: const Center(
+                                  child: Icon(
+                                    Icons.video_library,
+                                    color: Colors.grey,
+                                    size: 32,
+                                  ),
                                 ),
                               ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  _buildSection(
-                    'Voice Tone',
-                    GestureDetector(
-                      onTap: _showVoiceTonePicker,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.black, width: 1),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              _selectedVoiceTone ?? 'Select voice tone',
-                              style: TextStyle(
-                                color: _selectedVoiceTone != null
-                                    ? Colors.black
-                                    : Colors.grey,
+                            const SizedBox(width: 12),
+                            // 右侧文字信息
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          title,
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.black,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      GestureDetector(
+                                        onTap: () {
+                                          showDialog(
+                                            context: context,
+                                            builder: (context) => AlertDialog(
+                                              title: const Text('Delete Post'),
+                                              content: const Text('Are you sure you want to delete this post?'),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: () => Navigator.pop(context),
+                                                  child: const Text('Cancel'),
+                                                ),
+                                                TextButton(
+                                                  onPressed: () {
+                                                    Navigator.pop(context);
+                                                    _deletePost(index);
+                                                  },
+                                                  child: const Text(
+                                                    'Delete',
+                                                    style: TextStyle(color: Colors.red),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        },
+                                        child: const Icon(
+                                          Icons.delete_outline,
+                                          color: Colors.red,
+                                          size: 20,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    content,
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      color: Colors.black87,
+                                      height: 1.4,
+                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.record_voice_over,
+                                        size: 14,
+                                        color: Colors.black54,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Expanded(
+                                        child: Text(
+                                          voiceTone,
+                                          style: const TextStyle(
+                                            fontSize: 11,
+                                            color: Colors.black54,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.access_time,
+                                        size: 14,
+                                        color: Colors.black54,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Expanded(
+                                        child: Text(
+                                          _formatDateTime(createdAt),
+                                          style: const TextStyle(
+                                            fontSize: 11,
+                                            color: Colors.black54,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
                               ),
                             ),
-                            const Icon(Icons.arrow_drop_down),
                           ],
                         ),
-                      ),
-                    ),
+                      );
+                    },
                   ),
-                  const SizedBox(height: 40),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _handlePost,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.black,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: const Text(
-                        'Post',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 120),
-                ],
-              ),
-            ),
           ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildSection(String title, Widget child) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: Colors.black,
+// 视频封面图组件
+class _VideoThumbnail extends StatefulWidget {
+  final String videoPath;
+
+  const _VideoThumbnail({
+    required this.videoPath,
+  });
+
+  @override
+  State<_VideoThumbnail> createState() => _VideoThumbnailState();
+}
+
+class _VideoThumbnailState extends State<_VideoThumbnail> {
+  VideoPlayerController? _controller;
+  bool _isInitialized = false;
+  bool _hasError = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeVideo();
+  }
+
+  Future<void> _initializeVideo() async {
+    try {
+      final videoFile = File(widget.videoPath);
+      if (!await videoFile.exists()) {
+        setState(() {
+          _hasError = true;
+        });
+        return;
+      }
+
+      _controller = VideoPlayerController.file(videoFile);
+      await _controller!.initialize();
+      
+      if (mounted) {
+        setState(() {
+          _isInitialized = true;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _hasError = true;
+        });
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_hasError) {
+      return Container(
+        width: 100,
+        height: 100,
+        decoration: BoxDecoration(
+          color: Colors.grey[300],
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.black, width: 1),
+        ),
+        child: const Center(
+          child: Icon(
+            Icons.video_library,
+            color: Colors.grey,
+            size: 32,
           ),
         ),
-        const SizedBox(height: 8),
-        child,
-      ],
+      );
+    }
+
+    if (!_isInitialized || _controller == null) {
+      return Container(
+        width: 100,
+        height: 100,
+        decoration: BoxDecoration(
+          color: Colors.grey[300],
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.black, width: 1),
+        ),
+        child: const Center(
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+          ),
+        ),
+      );
+    }
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        width: 100,
+        height: 100,
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.black, width: 1),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            AspectRatio(
+              aspectRatio: _controller!.value.aspectRatio,
+              child: VideoPlayer(_controller!),
+            ),
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Center(
+                child: Icon(
+                  Icons.play_circle_filled,
+                  color: Colors.white,
+                  size: 30,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
+
 
