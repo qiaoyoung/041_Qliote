@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'Video_qyiaar_page.dart';
 import 'report_page.dart';
+import 'qyiaar_character_chat_page.dart';
 
 class QyiaarFigureDetailPage extends StatefulWidget {
   final Map<String, dynamic> character;
@@ -113,6 +114,52 @@ class _QyiaarFigureDetailPageState extends State<QyiaarFigureDetailPage> {
                         ),
                       ),
                     ],
+                  ),
+                  const SizedBox(height: 20),
+                  // 开始聊天按钮
+                  Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      color: const Color(0xFFFE69A8),
+                      border: Border.all(color: Colors.black, width: 1),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Colors.black,
+                          offset: Offset(4, 4),
+                          blurRadius: 0,
+                        ),
+                      ],
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => QyiaarCharacterChatPage(
+                                character: widget.character,
+                              ),
+                            ),
+                          );
+                        },
+                        borderRadius: BorderRadius.circular(12),
+                        child: const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          child: Center(
+                            child: Text(
+                              'Start Chat',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 20),
                   // 座右铭

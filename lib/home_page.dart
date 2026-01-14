@@ -3,8 +3,19 @@ import 'qyiaar_speech_page.dart';
 import 'qyiaar_Inspiration_page.dart';
 import 'qyiaar_profile_page.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => HomePageState();
+}
+
+class HomePageState extends State<HomePage> {
+  void refresh() {
+    setState(() {
+      // 刷新页面数据
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

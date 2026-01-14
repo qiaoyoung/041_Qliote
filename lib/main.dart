@@ -4,7 +4,20 @@ import 'qyiaar_speech_page.dart';
 import 'qyiaar_Inspiration_page.dart';
 import 'qyiaar_profile_page.dart';
 import 'qyiaar_post_page.dart';
+import 'qyiaar_message_page.dart';
 import 'welcome_page.dart';
+
+class PageRefreshNotifier {
+  static final PageRefreshNotifier _instance = PageRefreshNotifier._internal();
+  factory PageRefreshNotifier() => _instance;
+  PageRefreshNotifier._internal();
+
+  Function()? onRefresh;
+
+  void notifyRefresh() {
+    onRefresh?.call();
+  }
+}
 
 const Color _primaryColor = Color(0xFFFE69A8);
 
@@ -88,8 +101,36 @@ class MainTabBarPage extends StatefulWidget {
   State<MainTabBarPage> createState() => _MainTabBarPageState();
 }
 
-class _MainTabBarPageState extends State<MainTabBarPage> {
+class _MainTabBarPageState extends State<MainTabBarPage> with WidgetsBindingObserver {
   int _currentIndex = 0;
+  final GlobalKey<HomePageState> _homePageKey = GlobalKey<HomePageState>();
+  final GlobalKey<QyiaarMessagePageState> _messagePageKey = GlobalKey<QyiaarMessagePageState>();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    PageRefreshNotifier().onRefresh = refreshPages;
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    PageRefreshNotifier().onRefresh = null;
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      setState(() {});
+    }
+  }
+
+  void refreshPages() {
+    _homePageKey.currentState?.refresh();
+    _messagePageKey.currentState?.refresh();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -101,7 +142,7 @@ class _MainTabBarPageState extends State<MainTabBarPage> {
           IndexedStack(
             index: _currentIndex,
             children: [
-              const HomePage(),
+              HomePage(key: _homePageKey),
               QyiaarInspirationPage(
                 onDataChanged: () {
                   // 数据更改时刷新页面
@@ -109,6 +150,7 @@ class _MainTabBarPageState extends State<MainTabBarPage> {
                 },
               ),
               const QyiaarPostPage(),
+              QyiaarMessagePage(key: _messagePageKey),
               const QyiaarProfilePage(),
             ],
           ),
@@ -134,8 +176,12 @@ class _MainTabBarPageState extends State<MainTabBarPage> {
                     2,
                   ),
                   _buildNavButton(
-                    'assets/qyiaar_profile.png',
+                    'assets/qyiaar_message.png',
                     3,
+                  ),
+                  _buildNavButton(
+                    'assets/qyiaar_profile.png',
+                    4,
                   ),
                 ],
               ),

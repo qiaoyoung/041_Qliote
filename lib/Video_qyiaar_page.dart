@@ -1,7 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'report_page.dart';
+import 'main.dart';
 
 class VideoQyiaarPage extends StatefulWidget {
   final String videoPath;
@@ -223,6 +227,107 @@ class _VideoQyiaarPageState extends State<VideoQyiaarPage> {
     );
   }
 
+  Widget _buildReportButton(BuildContext context) {
+    return Container(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.white,
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black,
+            offset: Offset(4, 4),
+            blurRadius: 0,
+          ),
+        ],
+      ),
+      child: const Center(
+        child: Icon(
+          Icons.report_problem,
+          color: Colors.black,
+          size: 20,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _blockCharacter(String nickname) async {
+    final prefs = await SharedPreferences.getInstance();
+    final blockedList = prefs.getStringList('blocked_characters') ?? [];
+    if (!blockedList.contains(nickname)) {
+      blockedList.add(nickname);
+      await prefs.setStringList('blocked_characters', blockedList);
+    }
+  }
+
+  Future<void> _muteCharacter(String nickname) async {
+    final prefs = await SharedPreferences.getInstance();
+    final mutedList = prefs.getStringList('muted_characters') ?? [];
+    if (!mutedList.contains(nickname)) {
+      mutedList.add(nickname);
+      await prefs.setStringList('muted_characters', mutedList);
+    }
+  }
+
+  void _showActionSheet(BuildContext context) {
+    final nickname = widget.character['QyiaarNickName'] ?? 'Unknown';
+    
+    showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext context) => CupertinoActionSheet(
+        actions: [
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ReportPage(character: widget.character),
+                ),
+              );
+            },
+            child: const Text(
+              'Report',
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () async {
+              Navigator.pop(context);
+              await _blockCharacter(nickname);
+              PageRefreshNotifier().notifyRefresh();
+              Navigator.of(context).popUntil((route) => route.isFirst);
+            },
+            child: const Text(
+              'Block',
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () async {
+              Navigator.pop(context);
+              await _muteCharacter(nickname);
+              PageRefreshNotifier().notifyRefresh();
+              Navigator.of(context).popUntil((route) => route.isFirst);
+            },
+            child: const Text(
+              'Mute',
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          isDefaultAction: true,
+          child: const Text('Cancel'),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
@@ -401,6 +506,24 @@ class _VideoQyiaarPageState extends State<VideoQyiaarPage> {
                   alignment: Alignment.center,
                   color: Colors.transparent,
                   child: _buildBackButton(context),
+                ),
+              ),
+            ),
+            // Report button positioned on top right
+            Positioned(
+              top: statusBarHeight + 20,
+              right: 20,
+              child: GestureDetector(
+                onTap: () {
+                  _showActionSheet(context);
+                },
+                behavior: HitTestBehavior.opaque,
+                child: Container(
+                  width: 64,
+                  height: 64,
+                  alignment: Alignment.center,
+                  color: Colors.transparent,
+                  child: _buildReportButton(context),
                 ),
               ),
             ),
